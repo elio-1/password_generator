@@ -1,55 +1,45 @@
 import string
 import random
+import argparse
 import sys
 import pyperclip
 
 def main():
+    parser = argparse.ArgumentParser(description="Generate a random password")
+    parser.add_argument('-n', default=8, help="Specify the length of your password", type=int)
+    parser.add_argument('-a', '-all', help="Generate password with ascii, digits and punctuations", action="store_true")
+    parser.add_argument('-c', '-ascii', help="Add ascii letters to the generation pool | 0 for lower case | 1 for upper case | 2 for both", default=2, type=int, choices=[0, 1, 2])
+    parser.add_argument('-i', '-digit', '-d', help="Add digits to the generation pool", action="store_true")
+    parser.add_argument('-p', '-punctuation', help="Add punctuation to the generation pool", action="store_true")
+    args = parser.parse_args()
+
     chars = ''
-    all_char = string.ascii_letters + string.digits + string.punctuation
+    all_chars = string.ascii_letters + string.digits + string.punctuation
+    if args.a:
+        chars = string.ascii_letters + string.digits + string.punctuation
 
-    if len(sys.argv) == 1:
-        generator(all_char, 14)
-    if len(sys.argv) > 5:
-        helper()
-    if sys.argv[1] == 'h' or sys.argv[1] == '-h' or sys.argv[1] == 'help':
-        helper()
-    if len(sys.argv) == 5:
-        generator(all_char, get_length())
-    if len(sys.argv) == 4:
-        chars = chars + add_chars(sys.argv[2])
-        chars = chars + add_chars(sys.argv[3])
-    if len(sys.argv) == 3:
-        chars = chars + add_chars(sys.argv[2])
-    if len(sys.argv) == 2:
-        generator(all_char, get_length())
+    if args.c == 0:
+        chars += string.ascii_lowercase
+    if args.c == 1:
+        chars += string.ascii_uppercase
+    if args.c == 2:
+        chars += string.ascii_letters
     
-    generator(chars, get_length())
+    if args.i:
+        chars += string.digits
+    
+    if args.p:
+        chars += string.punctuation
+    
+    if len(sys.argv) != 1:
+        generator(chars, args.n)
+    else:
+        generator(all_chars, args.n)
+
+    
     
 
-def add_chars(char):
-    match char:
-            case "ascii" | "-ascii" | "asc" | "letters" | '-l'| '-c':
-                return string.ascii_letters
-            case "digits" | "d" | "-d" | "-digits" | "digit" | "-digit"|'-i':
-                return string.digits
-            case "punctuation" | "p" | "-p":
-                return string.punctuation
-            case "all" | "a" | '-a' | "-all":
-                return string.ascii_letters + string.digits + string.punctuation
-            case _:
-                helper()
-
-def get_length():
-    try:
-        return int(sys.argv[1])
-    except (IndexError) (ValueError):
-        helper()
-
-def helper():
-    print("Usage: python3 password_generator.py (optional:) [length] [all/ascii/digits/punctuations] [ascii/digits/punctuations] [ascii/digits/punctuations]")
-    print("python3 password_generator.py 16 -all")
-    print("python3 password_generator.py 12 ascii digits")
-    sys.exit()
+    
 
 def generator(character_list, length):
     password = ''
@@ -57,6 +47,7 @@ def generator(character_list, length):
         password = password + random.choice(character_list)
     pyperclip.copy(password)
     print("Your password: \n\n" + password + "\n\nCopied into your clipboard!")
+
 
 if __name__ == "__main__":
     main()
