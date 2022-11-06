@@ -20,7 +20,6 @@ def main():
         "-c",
         "-ascii",
         help="Add ascii letters to the generation pool | 0 for lower case | 1 for upper case | 2 for both",
-        default=2,
         type=int,
         choices=[0, 1, 2],
     )
@@ -37,10 +36,14 @@ def main():
         help="Add punctuation to the generation pool",
         action="store_true",
     )
+    parser.add_argument(
+        "-nocopy",
+        help="Don't automaticaly copy into your clipboard",
+        action="store_true",
+    )
     args = parser.parse_args()
 
     chars = ""
-    all_chars = string.ascii_letters + string.digits + string.punctuation
     if args.a:
         chars = string.ascii_letters + string.digits + string.punctuation
 
@@ -57,18 +60,23 @@ def main():
     if args.p:
         chars += string.punctuation
 
-    if len(sys.argv) != 1:
-        generator(chars, args.n)
+    if chars == '':
+        chars = string.ascii_letters + string.digits + string.punctuation
+    password = generator(chars, args.n)
+    
+
+    if args.nocopy:
+        print("Your password: \n\n" + password + "\n")
     else:
-        generator(all_chars, args.n)
+        pyperclip.copy(password)
+        print("Your password: \n\n" + password + "\n\nCopied into your clipboard!")
 
 
 def generator(character_list, length):
     password = ""
-    for i in range(length):
-        password = password + random.choice(character_list)
-    pyperclip.copy(password)
-    print("Your password: \n\n" + password + "\n\nCopied into your clipboard!")
+    for _ in range(length):
+        password = password + random.choice(character_list) 
+    return password
 
 
 if __name__ == "__main__":
