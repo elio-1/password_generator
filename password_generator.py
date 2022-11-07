@@ -8,7 +8,7 @@ import pyperclip
 def main():
     parser = argparse.ArgumentParser(description="Generate a random password")
     parser.add_argument(
-        "-n", default=8, help="Specify the length of your password", type=int
+        "-n", default=12, help="Specify the length of your password", type=int
     )
     parser.add_argument(
         "-a",
@@ -21,6 +21,9 @@ def main():
         "-ascii",
         help="Add ascii letters to the generation pool | 0 for lower case | 1 for upper case | 2 for both",
         type=int,
+        default=2,
+        const=2,
+        nargs='?',
         choices=[0, 1, 2],
     )
     parser.add_argument(
@@ -41,6 +44,12 @@ def main():
         help="Don't automaticaly copy into your clipboard",
         action="store_true",
     )
+    parser.add_argument(
+        '-output', '-o', type=argparse.FileType('w'), default=sys.stdout,
+        metavar='PATH',
+        help="Output file password in a .txt file"
+    )
+    
     args = parser.parse_args()
 
     chars = ""
@@ -62,9 +71,12 @@ def main():
 
     if chars == '':
         chars = string.ascii_letters + string.digits + string.punctuation
+
+    # generate the password    
     password = generator(chars, args.n)
     
-
+    args.output.write(password)
+    
     if args.nocopy:
         print("Your password: \n\n" + password + "\n")
     else:
